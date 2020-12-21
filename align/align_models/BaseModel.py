@@ -1,7 +1,6 @@
 import sys
 import torch
 import torch.nn as nn
-import numpy as np
 
 
 class BaseModel(nn.Module):
@@ -19,6 +18,8 @@ class BaseModel(nn.Module):
             kg_dim = self.rel_dim
         elif self.concat_method == 'add':
             kg_dim = self.ent_dim
+        elif self.concat_method == 'gem':
+            kg_dim = self.ent_dim
         else:
             print('Unrecognized concatenation method, please see documentation.')
             sys.exit()
@@ -33,9 +34,9 @@ class BaseModel(nn.Module):
             _triple = self.rel_embedding(_r)
         elif self.concat_method == 'add':
             _triple = self.entity_embedding(_h) + self.rel_embedding(_r) + self.entity_embedding(_t)
+        # elif self.concat_method == 'gem':
         _norm_triple = nn.functional.normalize(_triple, p=2, dim=1)
         return _norm_triple
-
 
     def get_norm_method(self):
         return self.normalize_vecs

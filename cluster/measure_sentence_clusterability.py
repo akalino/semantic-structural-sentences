@@ -1,3 +1,4 @@
+import json
 import matplotlib.pyplot as plt
 import numpy as np
 import os
@@ -6,7 +7,9 @@ import seaborn as sns
 import scipy as sp
 import torch
 import tqdm
+import umap
 
+from collections import Counter
 from scipy.spatial.distance import squareform
 from scipy.spatial.distance import pdist
 from sklearn.cluster import KMeans
@@ -28,9 +31,16 @@ def load_process_embedding_matrix(_path):
     """
     embs = torch.load(_path).numpy()
     print('Embeddings loaded')
+    print('Running PCA')
     embs_pca = PCA(n_components=2).fit_transform(embs)  #, svd_solver='arpack')
-    #embs_tsne = TSNE(n_components=2).fit_transform(embs)
-    embs_tsne = 0
+    print('Complete PCA')
+    print('Running UMAP')
+    #embs_tsne = TSNE(n_components=2, verbose=1, n_jobs=-1,
+    #                 n_iter=250, n_iter_without_progress=10).fit_transform(embs)
+    um_reducer = umap.UMAP(verbose=True, low_memory=True)
+    embs_tsne = um_reducer.fit_transform(embs)
+    print('Complete UMAP')
+    #embs_tsne = 0
     print('Embeddings projected')
     return embs, embs_pca, embs_tsne
 
@@ -148,6 +158,172 @@ def plot_embedding_tsne(_paths, _names):
     fig.savefig('sentence_tsne_comp.png')
 
 
+def plot_embedding_umap_labeled(_paths, _names, _labels):
+    group = _labels['rel_idx'].tolist()
+    group = list(filter((35).__ne__, group))
+    group = list(filter((1000).__ne__, group))
+    print(Counter(group))
+    fig, axs = plt.subplots(3, 3)
+    embs, proj0, tsne0 = load_process_embedding_matrix(_paths[0])
+    for g in np.unique(group):
+        i = np.where(group == g)
+        axs[0, 0].scatter(x=tsne0[i, 0], y=tsne0[i, 1], label=g)
+    axs[0, 0].set_title('{a}'.format(a=str(_names[0])))
+    axs[0, 0].set_xticks([])
+    axs[0, 0].set_yticks([])
+
+    embs, proj1, tsne1 = load_process_embedding_matrix(_paths[1])
+    for g in np.unique(group):
+        i = np.where(group == g)
+        axs[0, 1].scatter(x=tsne1[i, 0], y=tsne1[i, 1], label=g)
+    axs[0, 1].set_title('{a}'.format(a=str(_names[1])))
+    axs[0, 1].set_xticks([])
+    axs[0, 1].set_yticks([])
+
+    embs, proj2, tsne2 = load_process_embedding_matrix(_paths[2])
+    for g in np.unique(group):
+        i = np.where(group == g)
+        axs[0, 2].scatter(x=tsne2[i, 0], y=tsne2[i, 1], label=g)
+    axs[0, 2].set_title('{a}'.format(a=str(_names[2])))
+    axs[0, 2].set_xticks([])
+    axs[0, 2].set_yticks([])
+
+    embs, proj3, tsne3 = load_process_embedding_matrix(_paths[3])
+    for g in np.unique(group):
+        i = np.where(group == g)
+        axs[1, 0].scatter(x=tsne3[i, 0], y=tsne3[i, 1], label=g)
+    axs[1, 0].set_title('{a}'.format(a=str(_names[3])))
+    axs[1, 0].set_xticks([])
+    axs[1, 0].set_yticks([])
+
+    embs, proj4, tsne4 = load_process_embedding_matrix(_paths[4])
+    for g in np.unique(group):
+        i = np.where(group == g)
+        axs[1, 1].scatter(x=tsne4[i, 0], y=tsne4[i, 1], label=g)
+    axs[1, 1].set_title('{a}'.format(a=str(_names[4])))
+    axs[1, 1].set_xticks([])
+    axs[1, 1].set_yticks([])
+
+    embs, proj5, tsne5 = load_process_embedding_matrix(_paths[5])
+    for g in np.unique(group):
+        i = np.where(group == g)
+        axs[1, 2].scatter(x=tsne5[i, 0], y=tsne5[i, 1], label=g)
+    axs[1, 2].set_title('{a}'.format(a=str(_names[5])))
+    axs[1, 2].set_xticks([])
+    axs[1, 2].set_yticks([])
+
+    embs, proj6, tsne6 = load_process_embedding_matrix(_paths[6])
+    for g in np.unique(group):
+        i = np.where(group == g)
+        axs[2, 0].scatter(x=tsne6[i, 0], y=tsne6[i, 1], label=g)
+    axs[2, 0].set_title('{a}'.format(a=str(_names[6])))
+    axs[2, 0].set_xticks([])
+    axs[2, 0].set_yticks([])
+
+    embs, proj7, tsne7 = load_process_embedding_matrix(_paths[7])
+    for g in np.unique(group):
+        i = np.where(group == g)
+        axs[2, 1].scatter(x=tsne7[i, 0], y=tsne7[i, 1], label=g)
+    axs[2, 1].set_title('{a}'.format(a=str(_names[7])))
+    axs[2, 1].set_xticks([])
+    axs[2, 1].set_yticks([])
+
+    embs, proj8, tsne8 = load_process_embedding_matrix(_paths[8])
+    for g in np.unique(group):
+        i = np.where(group == g)
+        axs[2, 2].scatter(x=tsne8[i, 0], y=tsne8[i, 1], label=g)
+    axs[2, 2].set_title('{a}'.format(a=str(_names[8])))
+    axs[2, 2].set_xticks([])
+    axs[2, 2].set_yticks([])
+
+    fig.suptitle('Labeled UMAP Projections of Sentence Embedding Spaces')
+    # plt.show()
+    fig.savefig('sentence_umap_comp.png')
+
+
+def plot_embedding_pca_labeled(_paths, _names, _labels):
+    group = _labels['rel_idx'].tolist()
+    group = list(filter((35).__ne__, group))
+    group = list(filter((1000).__ne__, group))
+    print(Counter(group))
+    fig, axs = plt.subplots(3, 3)
+    embs, proj0, tsne0 = load_process_embedding_matrix(_paths[0])
+    for g in np.unique(group):
+        i = np.where(group == g)
+        axs[0, 0].scatter(x=proj0[i, 0], y=proj0[i, 1], label=g)
+    axs[0, 0].set_title('{a}'.format(a=str(_names[0])))
+    axs[0, 0].set_xticks([])
+    axs[0, 0].set_yticks([])
+
+    embs, proj1, tsne1 = load_process_embedding_matrix(_paths[1])
+    for g in np.unique(group):
+        i = np.where(group == g)
+        axs[0, 1].scatter(x=proj1[i, 0], y=proj1[i, 1], label=g)
+    axs[0, 1].set_title('{a}'.format(a=str(_names[1])))
+    axs[0, 1].set_xticks([])
+    axs[0, 1].set_yticks([])
+
+    embs, proj2, tsne2 = load_process_embedding_matrix(_paths[2])
+    for g in np.unique(group):
+        i = np.where(group == g)
+        axs[0, 2].scatter(x=proj2[i, 0], y=proj2[i, 1], label=g)
+    axs[0, 2].set_title('{a}'.format(a=str(_names[2])))
+    axs[0, 2].set_xticks([])
+    axs[0, 2].set_yticks([])
+
+    embs, proj3, tsne3 = load_process_embedding_matrix(_paths[3])
+    for g in np.unique(group):
+        i = np.where(group == g)
+        axs[1, 0].scatter(x=proj3[i, 0], y=proj3[i, 1], label=g)
+    axs[1, 0].set_title('{a}'.format(a=str(_names[3])))
+    axs[1, 0].set_xticks([])
+    axs[1, 0].set_yticks([])
+
+    embs, proj4, tsne4 = load_process_embedding_matrix(_paths[4])
+    for g in np.unique(group):
+        i = np.where(group == g)
+        axs[1, 1].scatter(x=proj4[i, 0], y=proj4[i, 1], label=g)
+    axs[1, 1].set_title('{a}'.format(a=str(_names[4])))
+    axs[1, 1].set_xticks([])
+    axs[1, 1].set_yticks([])
+
+    embs, proj5, tsne5 = load_process_embedding_matrix(_paths[5])
+    for g in np.unique(group):
+        i = np.where(group == g)
+        axs[1, 2].scatter(x=proj5[i, 0], y=proj5[i, 1], label=g)
+    axs[1, 2].set_title('{a}'.format(a=str(_names[5])))
+    axs[1, 2].set_xticks([])
+    axs[1, 2].set_yticks([])
+
+    embs, proj6, tsne6 = load_process_embedding_matrix(_paths[6])
+    for g in np.unique(group):
+        i = np.where(group == g)
+        axs[2, 0].scatter(x=proj6[i, 0], y=proj6[i, 1], label=g)
+    axs[2, 0].set_title('{a}'.format(a=str(_names[6])))
+    axs[2, 0].set_xticks([])
+    axs[2, 0].set_yticks([])
+
+    embs, proj7, tsne7 = load_process_embedding_matrix(_paths[7])
+    for g in np.unique(group):
+        i = np.where(group == g)
+        axs[2, 1].scatter(x=proj7[i, 0], y=proj7[i, 1], label=g)
+    axs[2, 1].set_title('{a}'.format(a=str(_names[7])))
+    axs[2, 1].set_xticks([])
+    axs[2, 1].set_yticks([])
+
+    embs, proj8, tsne8 = load_process_embedding_matrix(_paths[8])
+    for g in np.unique(group):
+        i = np.where(group == g)
+        axs[2, 2].scatter(x=proj8[i, 0], y=proj8[i, 1], label=g)
+    axs[2, 2].set_title('{a}'.format(a=str(_names[8])))
+    axs[2, 2].set_xticks([])
+    axs[2, 2].set_yticks([])
+
+    fig.suptitle('Labeled PCA Projections of Sentence Embedding Spaces')
+    # plt.show()
+    fig.savefig('sentence_pca_comp.png')
+
+
 def plot_embedding_spaces(_paths, _names):
     fig, axs = plt.subplots(3, 3)
     embs, proj0, t0 = load_process_embedding_matrix(_paths[0])
@@ -211,6 +387,25 @@ def plot_embedding_spaces(_paths, _names):
 
 if __name__ == "__main__":
     wd = os.path.normpath(os.getcwd() + os.sep + os.pardir)
+    sentence_path = os.path.join(wd, "data", "RESIDE", "riedel_data", "sentence_mapper.json")
+    with open(sentence_path, 'rb') as f:
+        sentences = json.load(f)
+    sentence_path = os.path.join(wd, "data", "RESIDE", "riedel_data", "validation_data.csv")
+    train_df = pd.read_csv(sentence_path)
+    try:
+        emb_labels = pd.read_csv('embedding_labels_valid.csv')
+    except FileNotFoundError:
+        rel_labels = []
+        i = 0
+        for sent_blob in tqdm.tqdm(sentences):
+            i += 1
+            try:
+                rel_labels.append(train_df[train_df['sentence'] == sent_blob]['rel_idx'].values[0])
+            except IndexError:
+                rel_labels.append(1000)
+        print(len(rel_labels))
+        emb_labels = pd.DataFrame({'sentence_emb': list(sentences), 'rel_idx': rel_labels})
+        emb_labels.to_csv('embedding_labels_valid.csv', index=False)
     paths = ['sentence-embeddings/random/riedel_random_space.pt',
              'sentence-embeddings/gem/riedel_gem_space.pt',
              'sentence-embeddings/glove/riedel_glove_space.pt',
@@ -220,14 +415,17 @@ if __name__ == "__main__":
              'sentence-embeddings/quickthought/riedel_quickthought_space.pt',
              'sentence-embeddings/sentbert/riedel_sentbert_space.pt',
              'sentence-embeddings/skipthought/riedel_skipthought_space.pt',
+             'sentence-embeddings/dct/riedel_dct_1_space.pt',
+             'sentence-embeddings/dct/riedel_dct_3_space.pt',
              'sentence-embeddings/dct/riedel_dct_5_space.pt']
     paths = [os.path.join(wd, p) for p in paths]
     names = ['random', 'gem', 'glove',
              'inferv1', 'inferv2',
              'laser', 'quickthought',
              'sentbert', 'skipthought',
-             'dct5']
-    plot_embedding_spaces(paths, names)
+             'dct1', 'dct3', 'dct5']
+    plot_embedding_pca_labeled(paths, names, emb_labels)
+    plot_embedding_umap_labeled(paths, names, emb_labels)
     sp = []
     mus = []
     sigs = []
@@ -243,5 +441,5 @@ if __name__ == "__main__":
     plot_spatial_histograms(names, sp, bins)
     outs = pd.DataFrame({'model': names, 'mean': mus, 'std': sigs})
     print(outs)
-    with open('spatial.tex', 'w') as tf:
+    with open('spatial-tsne.tex', 'w') as tf:
         tf.write(outs.to_latex(index=False))

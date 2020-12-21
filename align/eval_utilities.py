@@ -124,6 +124,10 @@ def find_precision(_model, _valid_src, _valid_trg, _valid_path, _annoy):
     if _annoy:
         ivs, ivs2 = find_similarities_annoy(_model, _valid_src, _valid_trg, 5, 10)
         valid_set = pd.read_csv(_valid_path)
+        if len(valid_set) != len(ivs):
+            valid_set = valid_set[valid_set['rel_idx'] != -1]
+        print(len(valid_set))
+        print(len(ivs))
         valid_set['top_pred'] = [t[0] for t in ivs]
         valid_set['pred_idx_5'] = ivs
         valid_set['pred_idx_10'] = ivs2

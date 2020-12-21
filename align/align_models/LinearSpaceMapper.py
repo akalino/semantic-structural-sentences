@@ -6,7 +6,6 @@ from .BaseModel import BaseModel
 
 class LinearSpaceMapper(BaseModel):
 
-
     def __init__(self, _sent_weights, _entity_weights, _relation_weights, _concat, _normalize_vecs, _beta, _tune):
         super().__init__()
         # torch.manual_seed(17)

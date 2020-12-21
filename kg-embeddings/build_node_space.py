@@ -4,7 +4,8 @@ import pandas as pd
 import sys
 import torch
 
-from OpenKE.openke.module.model import TransE, TransR, TransH, SimplE
+from OpenKE.openke.module.model import TransE, TransR, TransH, TransD, \
+    SimplE, RotatE, ComplEx, RESCAL
 from OpenKE.openke.data import TrainDataLoader, TestDataLoader
 
 
@@ -45,6 +46,23 @@ def load_embeddings(_fb_path, _model_path, _dim, _mt):
         transh.load_checkpoint(_model_path)
         _ent_embds = transh.ent_embeddings.weight
         _rel_embds = transh.rel_embeddings.weight
+    elif _mt == 'transd':
+        transd = TransD(ent_tot=train_dataloader.get_ent_tot(),
+                        rel_tot=train_dataloader.get_rel_tot(),
+                        dim_e=_dim,
+                        dim_r=_dim,
+                        p_norm=1,
+                        norm_flag=True)
+        transd.load_checkpoint(_model_path)
+        _ent_embds = transd.ent_embeddings.weight
+        _rel_embds = transd.rel_embeddings.weight
+    elif _mt == 'rotate':
+        rotate = RotatE(ent_tot=train_dataloader.get_ent_tot(),
+                        rel_tot=train_dataloader.get_rel_tot(),
+                        dim=_dim)
+        rotate.load_checkpoint(_model_path)
+        _ent_embds = rotate.ent_embeddings.weight
+        _rel_embds = rotate.rel_embeddings.weight
     elif _mt == 'simple':
         simple = SimplE(ent_tot=train_dataloader.get_ent_tot(),
                         rel_tot=train_dataloader.get_rel_tot(),
@@ -52,6 +70,22 @@ def load_embeddings(_fb_path, _model_path, _dim, _mt):
         simple.load_checkpoint(_model_path)
         _ent_embds = simple.ent_embeddings.weight
         _rel_embds = simple.rel_embeddings.weight
+    elif _mt == 'complex':
+        complex = ComplEx(ent_tot=train_dataloader.get_ent_tot(),
+                        rel_tot=train_dataloader.get_rel_tot(),
+                        dim=_dim)
+        complex.load_checkpoint(_model_path)
+        _ent_embds = complex.ent_re_embeddings.weight
+        _rel_embds = complex.rel_re_embeddings.weight
+    elif _mt == 'rescal':
+        rescal = RESCAL(ent_tot=train_dataloader.get_ent_tot(),
+                        rel_tot=train_dataloader.get_rel_tot(),
+                        dim=_dim)
+        rescal.load_checkpoint(_model_path)
+        _ent_embds = rescal.ent_embeddings.weight
+        _rel_embds = rescal.rel_matrices.weight
+    else:
+        print('Ya didnt define the model, dummy!')
     return _ent_embds, _rel_embds
 
 
@@ -65,7 +99,7 @@ def run_and_save(_dim, _mt, _ds):
         print('Invalid data set, please run the preprocessing steps.')
         sys.exit()
     if _mt == 'transr':
-        model_path = os.path.join(wd, "kg-embeddings", "checkpoints", "{m}_{d}_{d}_{s}.ckpt".format(m=_mt,
+        model_path = os.path.join(wd, "kg-embeddings", "checkpoints", "{m}_{d}_{s}.ckpt".format(m=_mt,
                                                                                                     d=_dim,
                                                                                                     s=_ds))
     else:

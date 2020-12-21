@@ -30,18 +30,26 @@ class SupervisedDataLoader(object):
         valid_batch_x = []
         valid_batch_y = []
         permutation = torch.randperm(self.valid_x.size()[0])
-        for i in range(0, self.valid_x.size()[0], self.batch_size):
-            indices = permutation[i:i + self.batch_size]
-            valid_batch_x.append(self.valid_x[indices])
-            valid_batch_y.append(self.valid_y[indices])
+        if self.batch_size == -1:
+            valid_batch_x.append(self.valid_x)
+            valid_batch_y.append(self.valid_y)
+        else:
+            for i in range(0, self.valid_x.size()[0], self.batch_size):
+                indices = permutation[i:i + self.batch_size]
+                valid_batch_x.append(self.valid_x[indices])
+                valid_batch_y.append(self.valid_y[indices])
         return valid_batch_x, valid_batch_y
 
     def create_all_batches(self):
         permutation = torch.randperm(self.train_x.size()[0])
         batch_x = []
         batch_y = []
-        for i in range(0, self.train_x.size()[0], self.batch_size):
-            indices = permutation[i:i + self.batch_size]
-            batch_x.append(self.train_x[indices])
-            batch_y.append(self.train_y[indices])
+        if self.batch_size == -1:
+            batch_x.append(self.train_x)
+            batch_y.append(self.train_y)
+        else:
+            for i in range(0, self.train_x.size()[0], self.batch_size):
+                indices = permutation[i:i + self.batch_size]
+                batch_x.append(self.train_x[indices])
+                batch_y.append(self.train_y[indices])
         return batch_x, batch_y
